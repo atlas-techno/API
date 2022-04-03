@@ -11,7 +11,7 @@ secret_key = str("0QGgdoYa4BLIoHDNirG5T36ax8YWArFA3b+WKNVs")
 
 app = FastAPI()
 
-origins = ["https://www.google.com"]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,15 +36,15 @@ def create_file(ec2):
 
     file.write('provider "aws" {\n')
     #file.write(f'   profile = default\n')
-    file.write(f'   region = var.reg_NV\n')
+    file.write(f'   region = "us-east-1"\n')
     file.write(f'   access_key = "{access_key}"\n')
     file.write(f'   secret_key = "{secret_key}"\n')
     file.write('}\n')
 
 
     file.write('resource "aws_instance" "ec2_atlas" {\n')
-    file.write(f'    ami = var.{ec2["ami"]}\n')
-    file.write(f'    instance_type= var.{ec2["type"]}\n')
+    file.write(f'    ami = "{ec2["ami"]}"\n')
+    file.write(f'    instance_type= "{ec2["type"]}"\n')
     file.write(f'    count = "{ec2["count"]}"')
     #file.write('    tags = {\n')
     #file.write(f'        Name="{ec2["name"]}"\n')
