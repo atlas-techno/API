@@ -1,2 +1,3 @@
 venv
-/app/pycache
+/app/__pycache__/
+checklist.md

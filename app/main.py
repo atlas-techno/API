@@ -1,7 +1,7 @@
 from dataclasses import field
-from re import A
 from fastapi import FastAPI
 from pydantic import BaseModel
+from re import A
 from random import randrange 
 import os
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,7 +24,7 @@ app.add_middleware(
 ec2_list = []
 
 def create_file(ec2):
-    file = open("infrastructure.tf",mode="w")
+    file = open("main.tf",mode="w")
     #file.write('terraform {\n')
     #file.write('    required_providers {\n')
     #file.write('        aws = {\n')
@@ -36,17 +36,19 @@ def create_file(ec2):
 
     file.write('provider "aws" {\n')
     #file.write(f'   profile = default\n')
-    file.write(f'   region = "us-east-1"\n')
+    file.write(f'   region = var.reg_NV\n')
     file.write(f'   access_key = "{access_key}"\n')
     file.write(f'   secret_key = "{secret_key}"\n')
     file.write('}\n')
 
-    file.write('resource "aws_instance" "my_server" {\n')
-    file.write('    ami = "ami-04505e74c0741db8d"\n')
-    file.write(f'    instance_type="{ec2["type"]}"\n')
-    file.write('    tags = {\n')
-    file.write('        Name="ExampleAppServer"\n')
-    file.write('    }\n')
+
+    file.write('resource "aws_instance" "ec2_atlas" {\n')
+    file.write(f'    ami = var.{ec2["ami"]}\n')
+    file.write(f'    instance_type= var.{ec2["type"]}\n')
+    file.write(f'    count = "{ec2["count"]}"')
+    #file.write('    tags = {\n')
+    #file.write(f'        Name="{ec2["name"]}"\n')
+    file.write('    \n')
     file.write('}')
     file.close()
     os.system("cd /home/cephalon/Desktop/atlas/ && source venv/bin/activate && terraform init && terraform plan && terraform apply --auto-approve")
@@ -58,9 +60,10 @@ def find_ec2(id):
             return ec2
 
 class Ec2(BaseModel):
+    name:str
     ami:str
     type:str 
-    amount:int 
+    count:str 
     vpc:str
     subnet:str 
     delonterm:bool 
