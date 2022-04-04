@@ -25,33 +25,23 @@ ec2_list = []
 
 def create_file(ec2):
     file = open("main.tf",mode="w")
-    #file.write('terraform {\n')
-    #file.write('    required_providers {\n')
-    #file.write('        aws = {\n')
-    #file.write('            source = "hashicorp/aws"\n')
-    #file.write('            version = "4.8.0"\n')
-    #file.write('        }\n')
-    #file.write('    }\n')
-    #file.write('}\n')
-
-    file.write('provider "aws" {\n')
-    #file.write(f'   profile = default\n')
-    file.write(f'   region = "us-east-1"\n')
-    file.write(f'   access_key = "{access_key}"\n')
-    file.write(f'   secret_key = "{secret_key}"\n')
-    file.write('}\n')
-
-
-    file.write('resource "aws_instance" "ec2_atlas" {\n')
-    file.write(f'    ami = "{ec2["ami"]}"\n')
-    file.write(f'    instance_type= "{ec2["type"]}"\n')
-    file.write(f'    count = "{ec2["count"]}"')
-    #file.write('    tags = {\n')
-    #file.write(f'        Name="{ec2["name"]}"\n')
-    file.write('    \n')
-    file.write('}')
+    """
+    file.write(ec2["ami"])
+    file.write(ec2["type"])
+    file.write(ec2["count"])
+    file.write(ec2["name"])
+    """
+    file.write(
+'''
+resource "aws_instance" "atlas_ec2" {{ 
+    ami = "{}"
+    instance_type = "{}"
+    count = "{}"
+    Name = "{}"
+}}
+'''.format(ec2["ami"],ec2["type"],ec2["count"],ec2["name"]))
     file.close()
-    os.system("cd /home/cephalon/Desktop/atlas/ && source venv/bin/activate && terraform init && terraform plan && terraform apply --auto-approve")
+    #os.system("cd /home/cephalon/Desktop/atlas/ && source venv/bin/activate && terraform init && terraform plan && terraform apply --auto-approve")
 
 
 def find_ec2(id):
