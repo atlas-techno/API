@@ -1,11 +1,8 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-from random import randrange 
 import os
-import sys
 from fastapi.middleware.cors import CORSMiddleware
-from modules.functions import edit_file, create_ec2_file, format_ec2, create_file
-
+from modules.file_manager import create_ec2_file, dictify
+from modules.resources import Ec2
 
 access_key = str("AKIA6FJTISO64JMYRSFH")
 secret_key = str("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")
@@ -22,54 +19,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-"""
-def create_file(name="main.tf"):
-    f = open(f'{name}',mode="x")
-    return name
-
-def edit_file(file):
-    return open(f'{file}',mode="w")
-
-def format_ec2(object):
-    ec2 = object.dict()
-    ec2["id"] = randrange(0,100000)
-    create_ec2_file(ec2)
-    return ec2
-
-def create_ec2_file(ec2):
-    file = edit_file(create_file())
-    file.write(
-    f'''
-    provider aws {{
-        region = "us-east-1"
-        access_key = "AKIA6FJTISO64JMYRSFH"
-        secret_key = "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"
-    }}
-
-    resource "aws_instance" "atlas_ec2" {{ 
-        ami = "{ec2["ami"]}"
-        instance_type = "{ec2["type"]}"
-        count = "{ec2["count"]}"
-        tags = {{
-            Name = "{ec2["name"]}"
-        }}
-    }}
-    ''')
-    file.close()
-"""
-class Ec2(BaseModel):
-    name:str
-    ami:str
-    type:str 
-    count:str 
-    vpc:str
-    subnet:str 
-    delonterm:bool 
-
+def validate():
+    validator = 1
+    return validate
 @app.post("/create-ec2")
 def create_ec2(ec2:Ec2):
-    format_ec2(ec2)
-    return ec2
+    create_ec2_file(dictify(ec2),validate())
+    return (ec2, validate())
 
 @app.get("/deploy")
 def deploy():
