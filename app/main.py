@@ -5,7 +5,10 @@ from pydantic import BaseModel
 from re import A
 from random import randrange 
 import os
+from pathlib import Path, PosixPath
 from fastapi.middleware.cors import CORSMiddleware
+
+
 
 access_key = str("AKIA6FJTISO64JMYRSFH")
 secret_key = str("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")
@@ -68,7 +71,7 @@ class Ec2(BaseModel):
 @app.post("/create-ec2")
 def create_ec2(ec2:Ec2):
     format_ec2(ec2)
-    return {"Status":f'You EC2 was succesful created with this configuration:{ec2}'}
+    return ec2
 
 @app.get("/deploy")
 def deploy():
@@ -78,3 +81,8 @@ def deploy():
 def destroy():
     os.system("cd /home/cephalon/Desktop/atlas && source venv/bin/activate && terraform destroy --auto-approve")
 
+@app.get('/inspect')
+def inspect_code():
+    f=open("main.tf",mode="r")
+    text = f.read()
+    return text

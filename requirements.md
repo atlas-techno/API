@@ -12,3 +12,4 @@
 11. run " sudo apt-get update && sudo apt-get install terraform "
 12. Make the code corrections
 13. run " uvicorn --host 0.0.0.0 app.main:app "
+main.tf
