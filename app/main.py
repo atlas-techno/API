@@ -24,7 +24,7 @@ def validate():
     return validate
 @app.post("/create-ec2")
 def create_ec2(ec2:Ec2):
-    create_ec2_file(dictify(ec2),validate())
+    create_ec2_file(dictify(ec2))
     return (ec2, validate())
 
 @app.get("/deploy")
