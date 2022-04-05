@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-import os
 from fastapi.middleware.cors import CORSMiddleware
-from modules.file_manager import create_ec2_file, dictify
+from modules.file_manager import create_file, dictify
+from modules.script_structures import is_tf, init_tf, aws_provider, aws_instance, build_script
 from modules.resources import Ec2
 
 access_key = str("AKIA6FJTISO64JMYRSFH")
@@ -19,22 +19,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def validate():
-    validator = 1
-    return validate
 @app.post("/create-ec2")
 def create_ec2(ec2:Ec2):
-    create_ec2_file(dictify(ec2))
-    return (ec2, validate())
+    if is_tf() == False: 
+        init_tf()
+    ec2 = dictify(ec2)
+    build_script(
+        create_file(),
+        aws_provider(access_key, secret_key),
+        aws_instance(ec2["resource_name"],ec2["ami"],ec2["type"],ec2["tag_name"])
+    )
+    return ec2
 
 @app.get("/deploy")
 def deploy():
-    os.system("cd /home/cephalon/Desktop/atlas && source venv/bin/activate && terraform init && terraform fmt && terraform plan && terraform apply --auto-approve")
-
+    pass
 @app.get('/destroy')
 def destroy():
-    os.system("cd /home/cephalon/Desktop/atlas && source venv/bin/activate && terraform destroy --auto-approve")
-
+    pass
 @app.get('/inspect')
 def inspect_code():
     f=open("main.tf",mode="r")
