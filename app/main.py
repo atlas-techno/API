@@ -1,13 +1,10 @@
-from dataclasses import field
-from tkinter import E
 from fastapi import FastAPI
 from pydantic import BaseModel
-from re import A
 from random import randrange 
 import os
-from pathlib import Path, PosixPath
+import sys
 from fastapi.middleware.cors import CORSMiddleware
-
+from modules.functions import edit_file, create_ec2_file, format_ec2, create_file
 
 
 access_key = str("AKIA6FJTISO64JMYRSFH")
@@ -25,6 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+"""
 def create_file(name="main.tf"):
     f = open(f'{name}',mode="x")
     return name
@@ -58,7 +56,7 @@ def create_ec2_file(ec2):
     }}
     ''')
     file.close()
-
+"""
 class Ec2(BaseModel):
     name:str
     ami:str
