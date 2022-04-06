@@ -47,7 +47,7 @@ resource "aws_instance" "{resource_name}" {{
         Name = "{tag_name}"
     }}
     root_block_device {{
-        delete_on_termination = "{delete_on_termination}"
+        delete_on_termination = "{str(delete_on_termination).lower()}"
     }}
 }}
 '''
