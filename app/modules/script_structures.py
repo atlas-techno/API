@@ -14,7 +14,30 @@ provider aws {{
 '''
     return aws_provider
 
-def aws_instance(resource_name,ami,type="t2.micro",count=1,tag_name=""):
+def aws_vpc(resource_name,cidr_block,tag_name=""):
+    aws_vpc = f'''
+resource "aws_vpc" "{resource_name}" {{
+    cidr_block  = "{cidr_block}"
+    tags = {{
+        Name = "{tag_name}"
+    }}
+}}
+'''
+    return aws_vpc
+
+def aws_subnet(resource_name,vpc_name,cidr_block,tag_name=""):
+    aws_subnet = f'''
+resource "aws_subnet" "{resource_name}" {{
+    vpc_id = aws_vpc.{vpc_name}.id
+    cidr_block = "{cidr_block}"
+    tags = {{
+        Name = "{tag_name}"
+    }}
+}}    
+'''
+    return aws_subnet
+
+def aws_instance(resource_name,ami,type="t2.micro",count=1,tag_name="",delete_on_termination="true"):
     aws_instance = f'''
 resource "aws_instance" "{resource_name}" {{
     ami = "{ami}"
@@ -22,6 +45,9 @@ resource "aws_instance" "{resource_name}" {{
     count = "{count}"
     tags = {{
         Name = "{tag_name}"
+    }}
+    root_block_device {{
+        delete_on_termination = "{delete_on_termination}"
     }}
 }}
 '''
