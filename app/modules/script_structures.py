@@ -14,14 +14,16 @@ provider aws {{
 '''
     return aws_provider
 
-def aws_instance(resource_name,ami,type,tag_name):
+def aws_instance(resource_name,ami,type="t2.micro",count=1,tag_name=""):
     aws_instance = f'''
 resource "aws_instance" "{resource_name}" {{
     ami = "{ami}"
-    type = "{type}"
+    instance_type = "{type}"
+    count = "{count}"
     tags = {{
         Name = "{tag_name}"
     }}
 }}
 '''
     return aws_instance
+

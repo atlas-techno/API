@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from modules.file_manager import dictify
 from modules.script_structures import aws_provider, aws_instance, build_script
 from modules.resources import Ec2
-from modules.terraform_controller import plan_and_apply, destroy
+from modules.terraform_controller import plan_and_apply, destroy_
 
 access_key = str("AKIA6FJTISO64JMYRSFH")
 secret_key = str("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")
@@ -43,7 +43,7 @@ def deploy():
 
 @app.get('/destroy')
 def destroy():
-    destroy()
+    destroy_()
     return {"Status":"Your infrastructure has been destroyed"}
 
 @app.get('/inspect')
