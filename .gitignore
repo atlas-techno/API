@@ -12,3 +12,9 @@ os_module.md
 modules/__pycache__
 app/modules/__pycache__
 engineering.md
+infrastructure
+infrastructure/
+/infrastructure
+/infrastructure/
+infrastructure/*
+infrastructure/*
