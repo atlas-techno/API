@@ -1,10 +1,10 @@
-from re import S
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from modules.file_manager import dictify
-from modules.script_structures import aws_provider, aws_vpc, aws_instance, build_script
-from modules.resources import Ec2, Vpc
-from modules.terraform_controller import plan_and_apply, destroy_
+from modules.file_manager import *
+from modules.script_structures import *
+from modules.resources import *
+from modules.terraform_controller import *
+from modules.dirs_manager import *
 
 access_key = str("AKIA6FJTISO64JMYRSFH")
 secret_key = str("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")
@@ -21,12 +21,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def init():
-    build_script(
-        aws_provider(access_key,secret_key)
-    )
-    return {"Status": "Script Initialized"}
+@app.post("/create_workspace")
+def create_workspace(workspace:Workspace):
+    workspace = dictify(workspace)
+    create_dir(workspace["name"])
 
 @app.post("/create-vpc")
 def create_vpc(vpc:Vpc):
@@ -53,9 +51,3 @@ def deploy():
 def destroy():
     destroy_()
     return {"Status":"Your infrastructure has been destroyed"}
-
-@app.get('/inspect')
-def inspect_code():
-    f=open("main.tf",mode="r")
-    text = f.read()
-    return text

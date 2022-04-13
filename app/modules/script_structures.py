@@ -1,10 +1,11 @@
+
 def build_script(*args):
     script = open("main.tf",mode="a")
     for arg in args:
         script.write(arg)
     script.close()
 
-def aws_provider(access_key,secret_key,region="us-east-1"):
+def aws_provider(access_key="null",secret_key="null",region="us-east-1"):
     aws_provider = f'''
 provider aws {{
     access_key = "{access_key}"

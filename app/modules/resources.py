@@ -1,5 +1,9 @@
 from pydantic import BaseModel
 
+class Workspace(BaseModel):
+    name:str
+    region:str
+
 class Ec2(BaseModel):
     resource_name:str
     ami:str
