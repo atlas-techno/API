@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from modules.file_manager import *
 from modules.script_structures import *
@@ -51,3 +51,14 @@ def deploy():
 def destroy():
     destroy_()
     return {"Status":"Your infrastructure has been destroyed"}
+
+@app.post("/img")
+def img(file:bytes = File(default="a")):
+    return {"file_size": len(file)}
+
+@app.post("/upload_img")
+def img(file:UploadFile):
+    return {"file_name": file.filename}
+
+    
+    

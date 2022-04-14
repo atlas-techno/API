@@ -9,16 +9,24 @@ class Ec2(BaseModel):
     ami:str
     type:str 
     count:str
-    tag_name:str
-    delete_on_termination:str 
+    volume_size:str
+    volume_type:str
+    delete_on_termination:str
 
 class Vpc(BaseModel):
     resource_name:str
     cidr_block:str
-    tag_name:str
+    enable_dns:str
 
 class Subnet(BaseModel):
     resource_name:str 
-    vpc_name:str 
+    vpc_id:str 
     cidr_block:str 
-    tag_name:str
+    az:str
+
+class Igw(BaseModel):
+    vpc_id:str 
+    tag_name:str 
+
+class Natgw(BaseModel):
+    subnet_id:str
