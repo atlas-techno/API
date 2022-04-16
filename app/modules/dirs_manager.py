@@ -1,9 +1,4 @@
-import os
-from pydantic import BaseModel
-
-class Dir(BaseModel):
-    dir_name:str
-    
+import os   
 def create_dir(dirname):
     os.system(f'cd /atlas && mkdir /atlas/{dirname} && cd /atlas/{dirname}')
 
@@ -12,3 +7,6 @@ def delete_dir(dirname):
 
 def rename_dir(dirname):
     os.system(f'cd /atlas && mv /atlas/{dirname}')
+
+def goto(dirname):
+    os.system(f'cd /atlas/{dirname}')

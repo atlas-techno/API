@@ -1,11 +1,11 @@
 
-def build_script(*args):
-    script = open("main.tf",mode="a")
+def build_script(type:str,path:str,*args):
+    script = open(f"/atlas/{path}/{type}.tf",mode="a")
     for arg in args:
         script.write(arg)
     script.close()
 
-def aws_provider(access_key="null",secret_key="null",region="us-east-1"):
+def aws_provider(access_key="AKIA6FJTISO64JMYRSFH",secret_key="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",region="us-east-1"):
     aws_provider = f'''
 provider aws {{
     access_key = "{access_key}"
@@ -38,14 +38,14 @@ resource "aws_subnet" "{resource_name}" {{
 '''
     return aws_subnet
 
-def aws_instance(resource_name,ami,type="t2.micro",count=1,tag_name="",volume_size="8",volume_type="gp2",delete_on_termination="true"):
+def aws_instance(resource_name,ami,type="t2.micro",count=1,volume_size="8",volume_type="gp2",delete_on_termination="true"):
     aws_instance = f'''
 resource "aws_instance" "{resource_name}" {{
     ami = "{ami}"
     instance_type = "{type}"
     count = "{count}"
     tags = {{
-        Name = "{tag_name}"
+        Name = "{resource_name}"
     }}
     root_block_device {{
         volume_size = "{volume_size}"

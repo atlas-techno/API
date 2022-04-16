@@ -1,4 +1,6 @@
+from sqlite3 import OptimizedUnicode
 from pydantic import BaseModel
+from typing import Optional
 
 class Workspace(BaseModel):
     name:str
@@ -12,11 +14,12 @@ class Ec2(BaseModel):
     volume_size:str
     volume_type:str
     delete_on_termination:str
+    eip: Optional[str] = "False"
 
 class Vpc(BaseModel):
     resource_name:str
     cidr_block:str
-    enable_dns:str
+    #enable_dns:str
 
 class Subnet(BaseModel):
     resource_name:str 

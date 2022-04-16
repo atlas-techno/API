@@ -25,40 +25,38 @@ app.add_middleware(
 def create_workspace(workspace:Workspace):
     workspace = dictify(workspace)
     create_dir(workspace["name"])
+    build_script("provider",workspace["name"],aws_provider("","",workspace["region"]))
 
-@app.post("/create-vpc")
-def create_vpc(vpc:Vpc):
+@app.post("/{workspace}/create-vpc")
+def create_vpc(workspace:str,vpc:Vpc):
+    goto(workspace)
+    print(workspace)
     vpc = dictify(vpc)
     build_script(
-        aws_vpc(vpc["resource_name"],vpc["cidr_block"],vpc["tag_name"])
+        "main",
+        workspace,
+        aws_vpc(vpc["resource_name"],vpc["cidr_block"])
     )
     return {"Status":f'Your vpc was created with this configuration: {vpc}'}
 
-@app.post("/create-ec2")
-def create_ec2(ec2:Ec2):
+@app.post("/{workspace}/create-ec2")
+def create_ec2(workspace:str,ec2:Ec2):
+    goto(workspace)
     ec2 = dictify(ec2)
     build_script(
-        aws_instance(ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["tag_name"],ec2["delete_on_termination"])
+        "main",
+        workspace,
+        aws_instance(ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["volume_size"],ec2["volume_type"],ec2["delete_on_termination"])
     )
     return {"Status": f'Your EC2 has been created with this configuration: {ec2}'}
 
-@app.get("/deploy")
-def deploy():
-    plan_and_apply()
+@app.get("/{workspace}/deploy")
+def deploy(workspace:str):
+    plan_and_apply(workspace)
     return {"Status":"Your infrastructure has been deployed"}
 
-@app.get('/destroy')
-def destroy():
+@app.get('/{workspace}/destroy')
+def destroy(workspace:str):
+    goto(workspace)
     destroy_()
     return {"Status":"Your infrastructure has been destroyed"}
-
-@app.post("/img")
-def img(file:bytes = File(default="a")):
-    return {"file_size": len(file)}
-
-@app.post("/upload_img")
-def img(file:UploadFile):
-    return {"file_name": file.filename}
-
-    
-    
