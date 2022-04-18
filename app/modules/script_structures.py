@@ -1,6 +1,6 @@
 
-def build_script(type:str,path:str,*args):
-    script = open(f"/atlas/{path}/{type}.tf",mode="a")
+def build_script(type:str,user:str,workspace:str,*args):
+    script = open(f"/atlas/{user}/{workspace}/{type}.tf",mode="a")
     for arg in args:
         script.write(arg)
     script.close()
