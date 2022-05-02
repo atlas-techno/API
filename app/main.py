@@ -1,17 +1,21 @@
-from fastapi import FastAPI, File, UploadFile, status
+from fastapi import FastAPI, File, UploadFile, status, Form
 from fastapi.middleware.cors import CORSMiddleware
 from modules.file_manager import *
 from modules.script_structures import *
 from modules.resources import *
 from modules.terraform_controller import *
 from modules.dirs_manager import *
+from modules.s3 import *
+
+s3 = boto3.client("s3")
+BUCKET_NAME = "atlas.storage"
 
 access_key = str("AKIA6FJTISO64JMYRSFH")
 secret_key = str("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")
 
 app = FastAPI()
 
-origins = ["*"]
+origins = ["origins"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -53,7 +57,13 @@ def create_ec2(user:str,workspace:str,ec2:Ec2):
 
 @app.get("/{user}/{workspace}/deploy", status_code=status.HTTP_202_ACCEPTED)
 def deploy(user:str,workspace:str):
-    plan_and_apply(user,workspace)
+    try:
+        pull_infra(user,workspace)
+        plan_and_apply(user,workspace)
+        push_infra(user,workspace)
+    except: 
+        plan_and_apply(user,workspace)
+        push_infra(user,workspace)
     return {"Status":"Your infrastructure has been deployed"}
 
 @app.get('/{user}/{workspace}/destroy', status_code=status.HTTP_202_ACCEPTED)
