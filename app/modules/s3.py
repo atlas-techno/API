@@ -12,11 +12,17 @@ def push_infra(user,workspace):
         upload = s3.upload_fileobj(f,BUCKET_NAME,f'/atlas/{user}/{workspace}/main.tf')
     with open(f"/atlas/{user}/{workspace}/provider.tf","rb") as f:
         upload = s3.upload_fileobj(f,BUCKET_NAME,f'/atlas/{user}/{workspace}/provider.tf')
+    with open(f'/atlas/{user}/{workspace}/var.tf',"rb") as f:
+        upload = s3.uploadobj(f,BUCKET_NAME,f'/atlas/{user}/{workspace}/var.tf')
+    with open(f'/atlas/{user}/{workspace}/infra_template.tf',"rb") as f:
+        upload = s3.uploadobj(f,BUCKET_NAME,f'/atlas/{user}/{workspace}/infra_template.tf')
 
 def pull_infra(user,workspace):
     main = s3.download_file(BUCKET_NAME, f'/atlas/{user}/{workspace}/main.tf')
     tfstate = s3.download_file(BUCKET_NAME, f'/atlas/{user}/{workspace}/tfstate.tf')
     provider = s3.download_file(BUCKET_NAME, f'/atlas/{user}/{workspace}/provider.tf')
+    infra_template = s3.download_file(BUCKET_NAME, f'/atlas/{user}/{workspace}/infra_template.tf')
+    variables = s3.download_file(BUCKET_NAME,f'/atlas/{user}/{workspace}/var.tf')
 
 
 """ List All Buckets

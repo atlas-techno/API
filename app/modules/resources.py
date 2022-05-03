@@ -1,4 +1,3 @@
-from sqlite3 import OptimizedUnicode
 from pydantic import BaseModel
 from typing import Optional
 

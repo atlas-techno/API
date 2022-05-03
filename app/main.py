@@ -30,6 +30,7 @@ def create_workspace(user:str,workspace:Workspace):
     workspace = dictify(workspace)
     create_workspace_(user,workspace["name"])
     build_script("provider",user,workspace["name"],aws_provider("AKIA6FJTISO64JMYRSFH","0QGgdoYa4BLIoHDNirG5T36ax8YWArFA3b+WKNVs",workspace["region"]))
+    build_script("var",user,workspace["name"],variables())
 
 @app.post("/{user}/{workspace}/create-vpc", status_code=status.HTTP_201_CREATED)
 def create_vpc(user:str,workspace:str,vpc:Vpc):
