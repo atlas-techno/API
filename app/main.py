@@ -6,7 +6,6 @@ from modules.resources import *
 from modules.terraform_controller import *
 from modules.dirs_manager import *
 from modules.s3 import *
-
 s3 = boto3.client("s3")
 BUCKET_NAME = "atlas.storage"
 

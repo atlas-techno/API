@@ -24,6 +24,10 @@ def pull_infra(user,workspace):
     infra_template = s3.download_file(BUCKET_NAME, f'/atlas/{user}/{workspace}/infra_template.tf')
     variables = s3.download_file(BUCKET_NAME,f'/atlas/{user}/{workspace}/var.tf')
 
+def show_users():
+    for objects in s3.objects.all():
+        print(objects)
+    #pass
 
 """ List All Buckets
 buckets_list = s3.list_buckets()
