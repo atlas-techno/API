@@ -21,3 +21,4 @@ infrastructure/*
 prototype/
 prototype
 prototype/
+app/modules/user.json
