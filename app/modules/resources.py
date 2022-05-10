@@ -13,18 +13,18 @@ class Ec2(BaseModel):
     volume_size:str
     volume_type:str
     delete_on_termination:str
-    eip: Optional[str] = "False"
+    subnet_id: Optional[str]  
 
 class Vpc(BaseModel):
     resource_name:str
-    cidr_block:str
+    cidr_block:int
     #enable_dns:str
 
 class Subnet(BaseModel):
     resource_name:str 
-    vpc_id:str 
-    cidr_block:str 
-    az:str
+    vpc_name:str 
+    cidr_block:int 
+    access:bool
 
 class Igw(BaseModel):
     vpc_id:str 

@@ -51,12 +51,37 @@ def create_ec2(user:str,workspace:str,ec2:Ec2):
         "main",
         user,
         workspace,
-        aws_instance(ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["volume_size"],ec2["volume_type"],ec2["delete_on_termination"])
+        aws_instance(ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["volume_size"],ec2["volume_type"],ec2["delete_on_termination"], ec2["subnet_id"])
     )
     return {"Status": f'Your EC2 has been created with this configuration: {ec2}'}
 
+@app.post("/{user}/{workspace}/create-subpub")
+def create_subpub(user:str,workspace:str,subnet:Subnet):
+    goto(user,workspace)
+    subnet = dictify(subnet)
+    build_script(
+        "main",
+        user,
+        workspace,
+        aws_subnet_public(subnet["resource_name"],subnet["vpc_name"],subnet["cidr_block"],subnet["tag_name"])
+    )
+    return {"Status": f'Your subnet was created'}
+
+@app.post("/{user}/{workspace}/create-subpriv")
+def create_subpriv(user:str,workspace:str,subnet:Subnet):
+    goto(user,workspace)
+    subnet = dictify(subnet)
+    build_script(
+        "main",
+        user,
+        workspace,
+        aws_subnet_private(subnet["resource_name"],subnet["vpc_name"],subnet["cidr_block"],subnet["tag_name"])
+    )
+    return {"Status": f'Your subnet was created'}
+
 @app.get("/{user}/{workspace}/deploy", status_code=status.HTTP_202_ACCEPTED)
 def deploy(user:str,workspace:str):
+    goto(user,workspace)
     try:
         pull_infra(user,workspace)
         plan_and_apply(user,workspace)
