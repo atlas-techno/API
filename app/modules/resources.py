@@ -18,7 +18,6 @@ class Ec2(BaseModel):
 class Vpc(BaseModel):
     resource_name:str
     cidr_block:int
-    #enable_dns:str
 
 class Subnet(BaseModel):
     resource_name:str 
