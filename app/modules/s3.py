@@ -10,16 +10,24 @@ def push_infra(user,workspace):
      #   upload = s3.upload_fileobj(f,BUCKET_NAME,f"/atlas/{user}/{workspace}/terraform.tfstate")
     with open(f"/atlas/{user}/{workspace}/main.tf","rb") as f:
         upload = s3.upload_fileobj(f,BUCKET_NAME,f'/atlas/{user}/{workspace}/main.tf')
+
     with open(f"/atlas/{user}/{workspace}/provider.tf","rb") as f:
         upload = s3.upload_fileobj(f,BUCKET_NAME,f'/atlas/{user}/{workspace}/provider.tf')
+
     with open(f'/atlas/{user}/{workspace}/var.tf',"rb") as f:
         upload = s3.upload_fileobj(f,BUCKET_NAME,f'/atlas/{user}/{workspace}/var.tf')
+        
+    with open(f'/atlas/{user}/{workspace}/terraform.tfstate','rb') as f:
+        upload = s3.upload_fileobj(f,BUCKET_NAME,f'/atlas/{user}/{workspace}/terraform.tfstate')
 
 def pull_infra(user,workspace):
-    main = s3.download_file(BUCKET_NAME, f'/atlas/{user}/{workspace}/main.tf')
-    tfstate = s3.download_file(BUCKET_NAME, f'/atlas/{user}/{workspace}/tfstate.tf')
-    provider = s3.download_file(BUCKET_NAME, f'/atlas/{user}/{workspace}/provider.tf')
-    variables = s3.download_file(BUCKET_NAME,f'/atlas/{user}/{workspace}/var.tf')
+    main = s3.download_file(BUCKET_NAME,f'/atlas/{user}/{workspace}/main.tf',f'/atlas/{user}/{workspace}/main.tf')
+
+    tfstate = s3.download_file(BUCKET_NAME,f'/atlas/{user}/{workspace}/terraform.tfstate',f'/atlas/{user}/{workspace}/terraform.tfstate')
+
+    provider = s3.download_file(BUCKET_NAME,f'/atlas/{user}/{workspace}/provider.tf',f'/atlas/{user}/{workspace}/provider.tf')
+
+    variables = s3.download_file(BUCKET_NAME,f'/atlas/{user}/{workspace}/var.tf',f'/atlas/{user}/{workspace}/var.tf')
 
 def show_users():
     for objects in s3.objects.all():
