@@ -166,7 +166,7 @@ resource "aws_route_table" "{resource_name}_route" {{
 
   route {{
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.{}_igw.id
+    gateway_id = aws_internet_gateway.{resource_name}_igw.id
   }}
 }}
 
