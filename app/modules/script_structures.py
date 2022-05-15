@@ -1,11 +1,10 @@
-
 def build_script(type:str,user:str,workspace:str,*args):
     script = open(f"/atlas/{user}/{workspace}/{type}.tf",mode="a")
     for arg in args:
         script.write(arg)
     script.close()
 
-def aws_provider(access_key="AKIA6FJTISO64JMYRSFH",secret_key="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",region="us-east-1"):
+def aws_provider(access_key="AKIA6FJTISO6YSYK7VZ2",secret_key="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",region="us-east-1"):
     aws_provider = f'''
 provider aws {{
     access_key = "{access_key}"
@@ -120,22 +119,23 @@ resource "aws_vpc" "{resource_name}_vpc" {{
 '''
     return aws_vpc
 
-def aws_subnet_public(resource_name,vpc_name,cidr_block=0,tag_name=""):
+def aws_subnet_public_igw(resource_name,vpc_name,cidr_block=0):
     aws_subnet = f'''
+#{resource_name}_igw
 resource "aws_subnet" "{resource_name}_subnet" {{
-    vpc_id = aws_vpc.{vpc_name}.id
+    vpc_id = aws_vpc.{vpc_name}_vpc.id
     cidr_block = var.Range[{cidr_block}]
     tags = {{
-        Name = "{tag_name}"
+        Name = "{resource_name}"
     }}
 }}   
 
 resource "aws_internet_gateway" "{resource_name}_igw" {{
-  vpc_id = aws_vpc.{vpc_name}.id
+  vpc_id = aws_vpc.{vpc_name}_vpc.id
 }}
 
 resource "aws_route_table" "{resource_name}_route" {{
-  vpc_id = aws_vpc.{vpc_name}.id
+  vpc_id = aws_vpc.{vpc_name}_vpc.id
 
   route {{
     cidr_block = "0.0.0.0/0"
@@ -151,13 +151,40 @@ resource "aws_route_table_association" "{resource_name}_assoc" {{
 '''
     return aws_subnet
 
-def aws_subnet_private(resource_name,vpc_name,cidr_block=0,tag_name=""):
-  aws_subnet_private = f'''
+def aws_subnet_public(resource_name,vpc_name,cidr_block=0):
+    aws_subnet = f'''
 resource "aws_subnet" "{resource_name}_subnet" {{
-    vpc_id = aws_vpc.{vpc_name}.id
+    vpc_id = aws_vpc.{vpc_name}_vpc.id
     cidr_block = var.Range[{cidr_block}]
     tags = {{
-        Name = "{tag_name}"
+        Name = "{resource_name}"
+    }}
+}}   
+
+resource "aws_route_table" "{resource_name}_route" {{
+  vpc_id = aws_vpc.{vpc_name}_vpc.id
+
+  route {{
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.{}_igw.id
+  }}
+}}
+
+resource "aws_route_table_association" "{resource_name}_assoc" {{
+  subnet_id      = aws_subnet.{resource_name}_subnet.id
+  route_table_id = aws_route_table.{resource_name}_route.id
+}}
+
+'''
+    return aws_subnet
+
+def aws_subnet_private(resource_name,vpc_name,cidr_block=0):
+  aws_subnet_private = f'''
+resource "aws_subnet" "{resource_name}_subnet" {{
+    vpc_id = aws_vpc.{vpc_name}_vpc.id
+    cidr_block = var.Range[{cidr_block}]
+    tags = {{
+        Name = "{resource_name}"
     }}
 }} 
 
@@ -172,7 +199,7 @@ resource "aws_nat_gateway" "{resource_name}_nat_gw" {{
 }}
 
 resource "aws_route_table" "{resource_name}_route" {{
-  vpc_id = aws_vpc.{vpc_name}.id
+  vpc_id = aws_vpc.{vpc_name}_vpc.id
 
 
   route {{
@@ -188,7 +215,7 @@ resource "aws_route_table_association" "private-assoc" {{
 '''
   return aws_subnet_private
 
-def aws_instance(resource_name,ami,type="t2.micro",count=1,volume_size="8",volume_type="gp2",delete_on_termination="true",subnet_id=""):
+def aws_instance(resource_name,ami,type="t2.micro",count=1,volume_size="8",volume_type="gp2",delete_on_termination="true",subnet_name=""):
     aws_instance = f'''
 resource "aws_instance" "{resource_name}_instance" {{
     ami = "{ami}"
@@ -202,7 +229,7 @@ resource "aws_instance" "{resource_name}_instance" {{
         volume_type = "{volume_type}"
         delete_on_termination = "{str(delete_on_termination).lower()}"
     }}
-    subnet_id = aws_subnet.{resource_name}_subnet.id
+    subnet_id = aws_subnet.{subnet_name}_subnet.id
 }}
 '''
     return aws_instance

@@ -1,3 +1,4 @@
+from tabnanny import check
 from fastapi import FastAPI, File, UploadFile, status, Form
 from fastapi.middleware.cors import CORSMiddleware
 from modules.file_manager import *
@@ -6,11 +7,12 @@ from modules.resources import *
 from modules.terraform_controller import *
 from modules.dirs_manager import *
 from modules.s3 import *
+
 s3 = boto3.client("s3")
 BUCKET_NAME = "atlas.storage"
 
-access_key = str("AKIA6FJTISO64JMYRSFH")
-secret_key = str("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")
+access_key = str("AKIA6FJTISO6YSYK7VZ2")
+secret_key = str("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")
 
 app = FastAPI()
 
@@ -28,7 +30,7 @@ app.add_middleware(
 def create_workspace(user:str,workspace:Workspace):
     workspace = dictify(workspace)
     create_workspace_(user,workspace["name"])
-    build_script("provider",user,workspace["name"],aws_provider("AKIA6FJTISO64JMYRSFH","0QGgdoYa4BLIoHDNirG5T36ax8YWArFA3b+WKNVs",workspace["region"]))
+    build_script("provider",user,workspace["name"],aws_provider("AKIA6FJTISO6YSYK7VZ2","XrVjyd1V9xjRd4hpBExfqdvL683q27EV06mw/PeT",workspace["region"]))
     build_script("var",user,workspace["name"],variables())
 
 @app.post("/{user}/{workspace}/create-vpc", status_code=status.HTTP_201_CREATED)
@@ -51,7 +53,7 @@ def create_ec2(user:str,workspace:str,ec2:Ec2):
         "main",
         user,
         workspace,
-        aws_instance(ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["volume_size"],ec2["volume_type"],ec2["delete_on_termination"], ec2["subnet_id"])
+        aws_instance(ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["volume_size"],ec2["volume_type"],ec2["delete_on_termination"], ec2["subnet_name"])
     )
     return {"Status": f'Your EC2 has been created with this configuration: {ec2}'}
 
@@ -63,7 +65,7 @@ def create_subpub(user:str,workspace:str,subnet:Subnet):
         "main",
         user,
         workspace,
-        aws_subnet_public(subnet["resource_name"],subnet["vpc_name"],subnet["cidr_block"],subnet["tag_name"])
+        check_igw()(subnet["resource_name"],subnet["vpc_name"],subnet["cidr_block"])
     )
     return {"Status": f'Your subnet was created'}
 
@@ -94,5 +96,7 @@ def deploy(user:str,workspace:str):
 @app.get('/{user}/{workspace}/destroy', status_code=status.HTTP_202_ACCEPTED)
 def destroy(user:str,workspace:str):
     goto(user,workspace)
-    destroy_()
+    pull_infra(user,workspace)
+    destroy_(user,workspace)
+    push_infra(user,workspace)
     return {"Status":"Your infrastructure has been destroyed"}
