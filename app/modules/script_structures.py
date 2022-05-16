@@ -116,10 +116,14 @@ resource "aws_vpc" "{resource_name}_vpc" {{
         Name = "{resource_name}"
     }}
 }}
+
+resource "aws_internet_gateway" "{resource_name}_igw" {{
+  vpc_id = aws_vpc.{resource_name}_vpc.id
+}}
 '''
     return aws_vpc
 
-def aws_subnet_public_igw(resource_name,vpc_name,cidr_block=0):
+def aws_subnet_public(resource_name,vpc_name,cidr_block=0):
     aws_subnet = f'''
 #{resource_name}_igw
 resource "aws_subnet" "{resource_name}_subnet" {{
@@ -130,16 +134,12 @@ resource "aws_subnet" "{resource_name}_subnet" {{
     }}
 }}   
 
-resource "aws_internet_gateway" "{resource_name}_igw" {{
-  vpc_id = aws_vpc.{vpc_name}_vpc.id
-}}
-
 resource "aws_route_table" "{resource_name}_route" {{
   vpc_id = aws_vpc.{vpc_name}_vpc.id
 
   route {{
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.{resource_name}_igw.id
+    gateway_id = aws_internet_gateway.{vpc_name}_igw.id
   }}
 }}
 
@@ -151,32 +151,6 @@ resource "aws_route_table_association" "{resource_name}_assoc" {{
 '''
     return aws_subnet
 
-def aws_subnet_public(resource_name,vpc_name,cidr_block=0):
-    aws_subnet = f'''
-resource "aws_subnet" "{resource_name}_subnet" {{
-    vpc_id = aws_vpc.{vpc_name}_vpc.id
-    cidr_block = var.Range[{cidr_block}]
-    tags = {{
-        Name = "{resource_name}"
-    }}
-}}   
-
-resource "aws_route_table" "{resource_name}_route" {{
-  vpc_id = aws_vpc.{vpc_name}_vpc.id
-
-  route {{
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.{resource_name}_igw.id
-  }}
-}}
-
-resource "aws_route_table_association" "{resource_name}_assoc" {{
-  subnet_id      = aws_subnet.{resource_name}_subnet.id
-  route_table_id = aws_route_table.{resource_name}_route.id
-}}
-
-'''
-    return aws_subnet
 
 def aws_subnet_private(resource_name,vpc_name,cidr_block=0):
   aws_subnet_private = f'''

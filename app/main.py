@@ -1,4 +1,3 @@
-from tabnanny import check
 from fastapi import FastAPI, File, UploadFile, status, Form
 from fastapi.middleware.cors import CORSMiddleware
 from modules.file_manager import *
@@ -20,7 +19,7 @@ origins = ["origins"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,7 +32,7 @@ def create_workspace(user:str,workspace:Workspace):
     build_script("provider",user,workspace["name"],aws_provider("AKIA6FJTISO6YSYK7VZ2","XrVjyd1V9xjRd4hpBExfqdvL683q27EV06mw/PeT",workspace["region"]))
     build_script("var",user,workspace["name"],variables())
 
-@app.post("/{user}/{workspace}/create-vpc", status_code=status.HTTP_201_CREATED)
+@app.post("/{user}/{workspace}/create_vpc", status_code=status.HTTP_201_CREATED)
 def create_vpc(user:str,workspace:str,vpc:Vpc):
     goto(user,workspace)
     vpc = dictify(vpc)
@@ -45,7 +44,7 @@ def create_vpc(user:str,workspace:str,vpc:Vpc):
     )
     return {"Status":f'Your vpc was created with this configuration: {vpc}'}
 
-@app.post("/{user}/{workspace}/create-ec2", status_code=status.HTTP_201_CREATED)
+@app.post("/{user}/{workspace}/create_ec2", status_code=status.HTTP_201_CREATED)
 def create_ec2(user:str,workspace:str,ec2:Ec2):
     goto(user,workspace)
     ec2 = dictify(ec2)
@@ -57,7 +56,7 @@ def create_ec2(user:str,workspace:str,ec2:Ec2):
     )
     return {"Status": f'Your EC2 has been created with this configuration: {ec2}'}
 
-@app.post("/{user}/{workspace}/create-subpub")
+@app.post("/{user}/{workspace}/create_subpub")
 def create_subpub(user:str,workspace:str,subnet:Subnet):
     goto(user,workspace)
     subnet = dictify(subnet)
@@ -65,11 +64,11 @@ def create_subpub(user:str,workspace:str,subnet:Subnet):
         "main",
         user,
         workspace,
-        check_igw()(subnet["resource_name"],subnet["vpc_name"],subnet["cidr_block"])
+        aws_subnet_public(subnet["resource_name"],subnet["vpc_name"],subnet["cidr_block"])
     )
     return {"Status": f'Your subnet was created'}
 
-@app.post("/{user}/{workspace}/create-subpriv")
+@app.post("/{user}/{workspace}/create_subpriv")
 def create_subpriv(user:str,workspace:str,subnet:Subnet):
     goto(user,workspace)
     subnet = dictify(subnet)
@@ -100,3 +99,4 @@ def destroy(user:str,workspace:str):
     destroy_(user,workspace)
     push_infra(user,workspace)
     return {"Status":"Your infrastructure has been destroyed"}
+
