@@ -1,4 +1,4 @@
-from app.modules.script_structures import *
+#from app.modules.script_structures import *
 from modules.dirs_manager import *
 def dictify(object):
     return object.dict()
