@@ -100,3 +100,5 @@ def destroy(user:str,workspace:str):
     push_infra(user,workspace)
     return {"Status":"Your infrastructure has been destroyed"}
 
+
+
