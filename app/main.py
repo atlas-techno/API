@@ -6,6 +6,7 @@ from modules.resources import *
 from modules.terraform_controller import *
 from modules.dirs_manager import *
 from modules.s3 import *
+from modules.mongodb import *
 
 s3 = boto3.client("s3")
 BUCKET_NAME = "atlas.storage"
@@ -26,14 +27,15 @@ app.add_middleware(
 )
 
 @app.post("/{user}/create_workspace", status_code=status.HTTP_201_CREATED)
-def create_workspace(user:str,workspace:Workspace):
+def create_workspace_http(user:str,workspace:Workspace):
     workspace = dictify(workspace)
     create_workspace_(user,workspace["name"])
     build_script("provider",user,workspace["name"],aws_provider("AKIA6FJTISO6YSYK7VZ2","XrVjyd1V9xjRd4hpBExfqdvL683q27EV06mw/PeT",workspace["region"]))
     build_script("var",user,workspace["name"],variables())
+    create_workspace(user,workspace["name"],workspace["region"])
 
 @app.post("/{user}/{workspace}/create_vpc", status_code=status.HTTP_201_CREATED)
-def create_vpc(user:str,workspace:str,vpc:Vpc):
+def create_vpc_http(user:str,workspace:str,vpc:Vpc):
     goto(user,workspace)
     vpc = dictify(vpc)
     build_script(
@@ -42,10 +44,11 @@ def create_vpc(user:str,workspace:str,vpc:Vpc):
         workspace,
         aws_vpc(vpc["resource_name"],vpc["cidr_block"])
     )
+    create_vpc(user,workspace,vpc["resource_name"],vpc["cidr_block"])
     return {"Status":f'Your vpc was created with this configuration: {vpc}'}
 
 @app.post("/{user}/{workspace}/create_ec2", status_code=status.HTTP_201_CREATED)
-def create_ec2(user:str,workspace:str,ec2:Ec2):
+def create_ec2_http(user:str,workspace:str,ec2:Ec2):
     goto(user,workspace)
     ec2 = dictify(ec2)
     build_script(
@@ -57,7 +60,7 @@ def create_ec2(user:str,workspace:str,ec2:Ec2):
     return {"Status": f'Your EC2 has been created with this configuration: {ec2}'}
 
 @app.post("/{user}/{workspace}/create_subpub")
-def create_subpub(user:str,workspace:str,subnet:Subnet):
+def create_subpub_http(user:str,workspace:str,subnet:Subnet):
     goto(user,workspace)
     subnet = dictify(subnet)
     build_script(
@@ -66,10 +69,11 @@ def create_subpub(user:str,workspace:str,subnet:Subnet):
         workspace,
         aws_subnet_public(subnet["resource_name"],subnet["vpc_name"],subnet["cidr_block"])
     )
+    create_subnet(user,workspace,subnet["resource_name"],subnet["vpc_name"],subnet["cidr_block"])
     return {"Status": f'Your subnet was created'}
 
 @app.post("/{user}/{workspace}/create_subpriv")
-def create_subpriv(user:str,workspace:str,subnet:Subnet):
+def create_subpriv_http(user:str,workspace:str,subnet:Subnet):
     goto(user,workspace)
     subnet = dictify(subnet)
     build_script(
@@ -93,10 +97,10 @@ def deploy(user:str,workspace:str):
     return {"Status":"Your infrastructure has been deployed"}
 
 @app.get('/{user}/{workspace}/destroy', status_code=status.HTTP_202_ACCEPTED)
-def destroy(user:str,workspace:str):
+def destroy_http(user:str,workspace:str):
     goto(user,workspace)
     pull_infra(user,workspace)
-    destroy_(user,workspace)
+    destroy(user,workspace)
     push_infra(user,workspace)
     return {"Status":"Your infrastructure has been destroyed"}
 
