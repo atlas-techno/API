@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 from typing import Optional
 
+class List_b(BaseModel):
+    workspaces: list[str] = []
+
 class Workspace(BaseModel):
     name:str
     region:str

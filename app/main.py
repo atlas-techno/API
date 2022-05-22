@@ -1,3 +1,4 @@
+import re
 from fastapi import FastAPI, File, UploadFile, status, Form
 from fastapi.middleware.cors import CORSMiddleware
 from modules.file_manager import *
@@ -57,6 +58,7 @@ def create_ec2_http(user:str,workspace:str,ec2:Ec2):
         workspace,
         aws_instance(ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["volume_size"],ec2["volume_type"],ec2["delete_on_termination"], ec2["subnet_name"])
     )
+    create_instance(ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["volume_size"],ec2["volume_type"],ec2["delete_on_termination"], ec2["subnet_name"])
     return {"Status": f'Your EC2 has been created with this configuration: {ec2}'}
 
 @app.post("/{user}/{workspace}/create_subpub")
@@ -104,5 +106,19 @@ def destroy_http(user:str,workspace:str):
     push_infra(user,workspace)
     return {"Status":"Your infrastructure has been destroyed"}
 
+@app.get("/{user}/query_workspaces")
+def query_workspaces_http(user:str):
+    workspaces = [x for x in query_workspaces(user)]
+    return workspaces
 
+@app.get("/{user}/{workspace}/query_vpcs")
+def query_vpcs_http(user:str,workspace:str):
+    return query_vpcs(user,workspace)
 
+@app.get("/{user}/{workspace}/{vpc_name}/query_subnets")
+def query_subnets_http(user,workspace:str,vpc_name:str):
+    return query_subnets(user,workspace,vpc_name)
+
+@app.get("/{user}/{workspace}/{vpc_name}/{subnet_id}/query_instances")
+def query_instances_http(user:str,workspace:str,vpc_name:str,subnet_id:str):
+    return query_instance(user,workspace,vpc_name,subnet_id)
