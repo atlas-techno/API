@@ -1,6 +1,7 @@
-from hashlib import new
+from modules.dirs_manager import *
 import pymongo
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 cluster = "mongodb+srv://atlas-techno:Atlas132@cluster0.wts6q.mongodb.net/?retryWrites=true&w=majority"
 
@@ -15,77 +16,55 @@ subnets = AtlasDB["subnets"]
 instances = AtlasDB["instances"]
 
 def create_workspace(id,name,region):
-    try:
+    if users.find_one({"_id":id}) == None:
         user_schema = {
-            "_id":f"{id}",
-            "workspaces":[f"{id}"f"{name}"]
+            "_id":f"{id}"
         }
 
         workspace_schema = { 
-            "_id":f"{id}"f"{name}",
-            "owner":f"{id}",
+            "user_id":f"{id}",
             "name":f"{name}",
-            "region":f"{region}",
-            "vpcs":[]
+            "region":f"{region}"
         }
         users.insert_one(user_schema)
         workspaces.insert_one(workspace_schema)
-    except:
+        workspace_id = f'{workspaces.find_one({"user_id":id,"name":name})["_id"]}'
+        create_workspace_(id,workspace_id)
+        return workspace_id
+    else:
         workspace_schema = { 
-            "_id":f"{id}"f"{name}",
-            "owner":f"{id}",
+            "user_id":f"{id}",
             "name":f"{name}",
-            "region":f"{region}",
-            "vpcs":[]
+            "region":f"{region}"
         }
         workspaces.insert_one(workspace_schema)
+        workspace_id = f'{workspaces.find_one({"user_id":id,"name":name})["_id"]}'
+        create_workspace_(id,workspace_id)
+        return workspace_id
 
-def create_vpc(id,workspace,name,cidr_block):
+def create_vpc(workspace,name,cidr_block):
     vpc_schema = {
-        "_id":f"{workspace}"f"{name}",
-        "owner":f"{workspace}",""
-        "name":f"{name}",
+        "workspace_id":f"{workspace}",
+        "resource_name":f"{name}",
         "cidr_block":f"{cidr_block}",
-        "subnets": []
     }
     vpcs.insert_one(vpc_schema)
-    workspaces.find_one_and_update(
-        {
-            "_id":f"{id}"f"{workspace}"
-        },
-        {
-            "$push":
-            {
-                "vpcs":f"{workspace}"f"{name}"
-            }
-        }
-    )
+    vpc_id = f'{vpcs.find_one({"workspace_id":workspace,"resource_name":name})["_id"]}'
+    return vpc_id
 
-def create_subnet(id,workspace,resource_name,vpc_name,cidr_block):
+def create_subnet(vpc_id,resource_name,cidr_block):
     subnet_schema = {
-        "_id":f"{vpc_name}"f"{resource_name}",
-        "owner":f"{vpc_name}",
+        "vpc_id":f'{vpc_id}',
         "resource_name":f"{resource_name}",
         "cidr_block":f"{cidr_block}",
-        "instances":[]
     }
     subnets.insert_one(subnet_schema)
-    vpcs.find_one_and_update(
-        {
-            "_id":f"{workspace}"f"{vpc_name}"
-        },
-        {
-            "$push":
-            {
-                "subnets":f"{vpc_name}"f"{resource_name}"
-            }
-        }
-    )
+    subnet_id = f'{subnets.find_one({"vpc_id":f"{vpc_id}","resource_name":f"{resource_name}"})["_id"]}'
+    return subnet_id
 
-def create_instance(resource_name,ami,type,count,volume_size,volume_type,delete_on_termination,subnet_name):
+def create_instance(subnet_id,resource_name,ami,type,count,volume_size,volume_type,delete_on_termination):
     instance_schema = {
-        "_id":f"{subnet_name}"f"{resource_name}",
-        "owner":f"{subnet_name}",
+        "subnet_id":f"{subnet_id}",
         "resource_name":f"{resource_name}",
         "ami":f"{ami}",
         "type":f"{type}",
@@ -95,58 +74,71 @@ def create_instance(resource_name,ami,type,count,volume_size,volume_type,delete_
         "delete_on_termination":f"{delete_on_termination}"
     }
     instances.insert_one(instance_schema)
-    vpc = subnets.find_one({"resource_name":f"{subnet_name}"})["owner"]
-    subnets.find_one_and_update(
-        {
-            "_id":f"{vpc}"f"{subnet_name}"
-        },
-        {
-            "$push":
-            {
-                "instances":f"{subnet_name}"f"{resource_name}"
-            }
-        }
-    )
+    instance = instances.find_one({"subnet_id":f"{subnet_id}","resource_name":f"{resource_name}"})
+    instance["_id"] = f'{instance["_id"]}'
+    return instance
 
 def query_workspaces(id):
-    workspaces_list = workspaces.find({"owner":f"{id}"})
-    return workspaces_list    
+    user_id = {
+        'user_id':f"{id}"
+    }
 
-def query_vpcs(id,workspace):
-    workspaces_list = workspaces.find_one({"_id":f"{id}"f"{workspace}"})["vpcs"]
-    vpc_list = [vpcs.find_one({"_id":f"{x}"}) for x in workspaces_list]
-    return vpc_list
+    workspace_object_list = [
+        {
+            "user_id":x["user_id"],
+            "_id":f'{x["_id"]}',
+            "name":x["name"],
+            "region":x["region"]
+        }
+        for x in workspaces.find(user_id)
+    ]
 
-def query_subnets(id,workspace,vpc_name):
-    user = users.find_one({"_id":f"{id}"}) #Retorna um Dict
-    #print(f"\n\n\n\n User: {user}\n\n\n\n\n")
+    return workspace_object_list
 
-    workspace_objs_list = [workspaces.find_one({"_id":f"{x}"}) for x in user["workspaces"]] # Retonar uma lista de workspaces em forma de objetos
-    #print(f"\n\n\n\n Workspace_list: {workspace_objs_list}\n\n\n\n\n")
+def query_vpcs(workspace):
+    workspace_id = {
+        "workspace_id":f"{workspace}"
+    }
 
-    selected_vpc = ""
+    vpc_object_list = [
+        {
+            "workspace_id":f'{x["workspace_id"]}',
+            "_id":f'{x["_id"]}',
+            "resource_name":x["resource_name"],
+            "cidr_block":x["cidr_block"]
+        }
+        for x in vpcs.find(workspace_id)
+    ]
 
-    for x in workspace_objs_list:
-        if x["name"] == workspace:
-            for y in x["vpcs"]:
-                if y == f"{workspace}"f"{vpc_name}":
-                    selected_vpc = y 
-  
-    vpc = vpcs.find_one({"_id":f"{selected_vpc}"})
-    subnet_list = vpc["subnets"]
-    subnet_list_obj = []
-    for x in subnet_list:
-        subnet_obj = subnets.find_one({"_id":f"{x}"})
-        subnet_list_obj.append(subnet_obj)
-    return subnet_list_obj
+    return vpc_object_list
 
-def query_instance(user,workspace,vpc_name,subnet_id):
-    subnet_list = query_subnets(user,workspace,vpc_name)
+def query_subnets(workspace):
+    workspace_id = {
+        "workspace_id":f"{workspace}"
+    }
 
-    for subnet in subnet_list:
-        if subnet["resource_name"] == subnet_id:
-            print(subnet_id)
-            instance_list = []
-            instance_list = subnet["instances"]
-            instance_obj = [instances.find_one({"_id":f"{x}"}) for x in instance_list]
-            return instance_obj
+    subnet_object_list = [] 
+
+    for x in query_vpcs(workspace):
+        for y in subnets.find({"vpc_id":f"{x['_id']}"}):
+            y["_id"] = f'{y["_id"]}'
+            subnet_object_list.append(y)
+    return subnet_object_list
+
+
+
+def query_instance(workspace):
+
+    instances_object_list = []
+
+    workspace_id = {
+        "_id":f"{workspace}"
+    }
+
+    for x in query_subnets(workspace):
+        for y in instances.find({"subnet_id":f'{x["_id"]}'}):
+            y["_id"] = f'{y["_id"]}'
+            instances_object_list.append(y)
+
+    return instances_object_list
+    

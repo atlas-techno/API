@@ -13,12 +13,14 @@ class Vpc(BaseModel):
     cidr_block:int
 
 class Subnet(BaseModel):
+    vpc_id:str
+    vpc_name:str
     resource_name:str 
-    vpc_name:str 
     cidr_block:int 
-    #access:bool
 
 class Ec2(BaseModel):
+    subnet_id:str
+    subnet_name:str
     resource_name:str
     ami:str
     type:str 
@@ -26,7 +28,6 @@ class Ec2(BaseModel):
     volume_size:str
     volume_type:str
     delete_on_termination:str
-    subnet_name: Optional[str]  
 
 
 class Igw(BaseModel):
