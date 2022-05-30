@@ -1,9 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
 
-class List_b(BaseModel):
-    workspaces: list[str] = []
-
 class Workspace(BaseModel):
     name:str
     region:str
@@ -28,7 +25,7 @@ class Ec2(BaseModel):
     volume_size:str
     volume_type:str
     delete_on_termination:str
-
+    key_name:str
 
 class Igw(BaseModel):
     vpc_id:str 

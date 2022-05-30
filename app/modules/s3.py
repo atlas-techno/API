@@ -1,4 +1,6 @@
 import boto3
+import os
+from modules.mongodb import query_workspaces
 
 BUCKET_NAME = "atlas.storage"
 
@@ -29,11 +31,10 @@ def pull_infra(user,workspace):
 
     variables = s3.download_file(BUCKET_NAME,f'/atlas/{user}/{workspace}/var.tf',f'/atlas/{user}/{workspace}/var.tf')
 
-def show_users():
-    for objects in s3.objects.all():
-        print(objects)
-    #pass
-
+def query_keys_s3(user,workspace):
+    key_list = os.listdir(f"/atlas/{user}/{workspace}/keys")
+    return key_list
+    
 """ List All Buckets
 buckets_list = s3.list_buckets()
 for bucket in buckets_list["Buckets"]:

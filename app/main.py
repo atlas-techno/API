@@ -1,3 +1,4 @@
+import ssl
 from fastapi import FastAPI, File, UploadFile, status, Form
 from fastapi.middleware.cors import CORSMiddleware
 from modules.file_manager import *
@@ -29,7 +30,6 @@ app.add_middleware(
 @app.post("/{user}/create_workspace", status_code=status.HTTP_201_CREATED)
 def create_workspace_http(user:str,workspace:Workspace):
     workspace = dictify(workspace)
-    #create_workspace_(user,workspace)
     workspace_id = create_workspace(user,workspace["name"],workspace["region"])
     build_script("provider",user,workspace_id,aws_provider("AKIA6FJTISO6YSYK7VZ2","XrVjyd1V9xjRd4hpBExfqdvL683q27EV06mw/PeT",workspace["region"]))
     build_script("var",user,workspace_id,variables())
@@ -61,19 +61,6 @@ def create_subpub_http(user:str,workspace:str,subnet:Subnet):
     )
     return {"subnet_id":subnet_id}
 
-@app.post("/{user}/{workspace}/create_ec2", status_code=status.HTTP_201_CREATED)
-def create_ec2_http(user:str,workspace:str,ec2:Ec2):
-    goto(user,workspace)
-    ec2 = dictify(ec2)
-    build_script(
-        "main",
-        user,
-        workspace,
-        aws_instance(ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["volume_size"],ec2["volume_type"],ec2["delete_on_termination"], ec2["subnet_name"])
-    )
-    instance= create_instance(ec2["subnet_id"],ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["volume_size"],ec2["volume_type"],ec2["delete_on_termination"])
-    return instance
-
 @app.post("/{user}/{workspace}/create_subpriv")
 def create_subpriv_http(user:str,workspace:str,subnet:Subnet):
     goto(user,workspace)
@@ -85,6 +72,32 @@ def create_subpriv_http(user:str,workspace:str,subnet:Subnet):
         aws_subnet_private(subnet["resource_name"],subnet["vpc_name"],subnet["cidr_block"],subnet["tag_name"])
     )
     return {"Status": f'Your subnet was created'}
+
+@app.post("/{user}/{workspace}/create_ec2", status_code=status.HTTP_201_CREATED)
+def create_ec2_http(user:str,workspace:str,ec2:Ec2):
+    goto(user,workspace)
+
+    ec2 = dictify(ec2)
+    if ec2["key_name"] == "":
+        genkey(user,workspace,ec2["key_name"])
+        build_script(
+            "main",
+            user,
+            workspace,
+            aws_key_pair(user,workspace,ec2["key_name"]),
+            aws_instance(ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["volume_size"],ec2["volume_type"],ec2["delete_on_termination"], ec2["subnet_name"],ec2["key_name"])
+        )
+    else: 
+        build_script(
+            "main",
+            user,
+            workspace,
+            aws_instance(ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["volume_size"],ec2["volume_type"],ec2["delete_on_termination"], ec2["subnet_name"],ec2["key_name"])
+        )
+
+    instance= create_instance(ec2["subnet_id"],ec2["resource_name"],ec2["ami"],ec2["type"],ec2["count"],ec2["volume_size"],ec2["volume_type"],ec2["delete_on_termination"])
+
+    return instance
 
 @app.get("/{user}/{workspace}/deploy", status_code=status.HTTP_202_ACCEPTED)
 def deploy(user:str,workspace:str):
@@ -125,3 +138,9 @@ def query_subnets_http(workspace:str):
 def query_instances_http(workspace):
     instances_object_list = query_instance(workspace)
     return instances_object_list
+
+
+@app.get("/{user}/{workspace}/query_keys")
+def query_keys_http(user:str,workspace:str):
+    keys_list = query_keys_s3(user,workspace)
+    return keys_list

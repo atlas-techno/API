@@ -189,7 +189,7 @@ resource "aws_route_table_association" "private-assoc" {{
 '''
   return aws_subnet_private
 
-def aws_instance(resource_name,ami,type="t2.micro",count=1,volume_size="8",volume_type="gp2",delete_on_termination="true",subnet_name=""):
+def aws_instance(resource_name,ami,type="t2.micro",count=1,volume_size="8",volume_type="gp2",delete_on_termination="true",subnet_name="",key_name=""):
     aws_instance = f'''
 resource "aws_instance" "{resource_name}_instance" {{
     ami = "{ami}"
@@ -204,7 +204,18 @@ resource "aws_instance" "{resource_name}_instance" {{
         delete_on_termination = "{str(delete_on_termination).lower()}"
     }}
     subnet_id = aws_subnet.{subnet_name}_subnet.id
+    key_name = {key_name}
 }}
+
 '''
     return aws_instance
+
+def aws_key_pair(user,workspace,key_name):
+  aws_key_pair = f'''
+resource "aws_key_pair" "{key_name}_key" {{
+  key_name   = "{key_name}"
+  public_key = file("/atlas/{user}/{workspace}/keys/{key_name}.pub")
+}}
+'''
+  return aws_key_pair
 
