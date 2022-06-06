@@ -31,10 +31,31 @@ def pull_infra(user,workspace):
 
     variables = s3.download_file(BUCKET_NAME,f'/atlas/{user}/{workspace}/var.tf',f'/atlas/{user}/{workspace}/var.tf')
 
+
+def push_key(user,workspace,key_name):
+    with open(f"/atlas/{user}/{workspace}/keys/{key_name}.pem","rb") as f:
+        upload = s3.upload_fileobj(f,BUCKET_NAME,f'/atlas/{user}/{workspace}/keys/{key_name}.pem') 
+    
+def pull_key(user,workspace,key_name):
+    main = s3.download_file(BUCKET_NAME,f'/atlas/{user}/{workspace}/keys/{key_name}.pem',f'/atlas/{user}/{workspace}/keys/{key_name}.pem')
+
 def query_keys_s3(user,workspace):
     key_list = os.listdir(f"/atlas/{user}/{workspace}/keys")
     return key_list
-    
+
+def create_presigned_url(bucket_name, object_name, expiration=60):
+    """Generate a presigned URL to share an S3 object
+
+    :param bucket_name: string
+    :param object_name: string
+    :param expiration: Time in seconds for the presigned URL to remain valid
+    :return: Presigned URL as string. If error, returns None.
+    """
+    response = s3.generate_presigned_url('get_object',Params={'Bucket': bucket_name,'Key': object_name},ExpiresIn=expiration)
+
+    return response
+
+
 """ List All Buckets
 buckets_list = s3.list_buckets()
 for bucket in buckets_list["Buckets"]:

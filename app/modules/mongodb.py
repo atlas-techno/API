@@ -14,6 +14,7 @@ workspaces = AtlasDB["workspaces"]
 vpcs = AtlasDB["vpcs"]
 subnets = AtlasDB["subnets"]
 instances = AtlasDB["instances"]
+ssh_keys = AtlasDB["ssh_keys"]
 
 def create_workspace(id,name,region):
     if users.find_one({"_id":id}) == None:
@@ -78,6 +79,15 @@ def create_instance(subnet_id,resource_name,ami,type,count,volume_size,volume_ty
     instance["_id"] = f'{instance["_id"]}'
     return instance
 
+def create_ssh_key_mongodb(user,key_name):
+    key_schema = {
+        "user_id":f"{user}",
+        "key_name":f"{key_name}"
+
+    }
+    ssh_keys.insert_one(key_schema)
+
+
 def query_workspaces(id):
     user_id = {
         'user_id':f"{id}"
@@ -126,7 +136,6 @@ def query_subnets(workspace):
     return subnet_object_list
 
 
-
 def query_instance(workspace):
 
     instances_object_list = []
@@ -141,4 +150,13 @@ def query_instance(workspace):
             instances_object_list.append(y)
 
     return instances_object_list
+
+def query_ssh_keys_mongdb(user):
+    ssh_keys_list = []
+    ssh_keys_object_list = ssh_keys.find([{"user_id":f"{user}"}])
+    for x in ssh_keys_object_list:
+        x["_id"] = f'{x["_id"]}'
+        ssh_keys_list.append(x)
+    return ssh_keys_list
+
     

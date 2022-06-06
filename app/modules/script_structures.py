@@ -1,3 +1,4 @@
+from modules.mongodb import query_subnets, query_vpcs
 def build_script(type:str,user:str,workspace:str,*args):
     script = open(f"/atlas/{user}/{workspace}/{type}.tf",mode="a")
     for arg in args:
@@ -189,7 +190,16 @@ resource "aws_route_table_association" "private-assoc" {{
 '''
   return aws_subnet_private
 
-def aws_instance(resource_name,ami,type="t2.micro",count=1,volume_size="8",volume_type="gp2",delete_on_termination="true",subnet_name="",key_name=""):
+def aws_instance(workspace,resource_name,ami,type="t2.micro",count=1,volume_size="8",volume_type="gp2",delete_on_termination="true",subnet_name="",key_name=""):
+  vpc_id = ""
+  vpc_name = ""
+  for x in query_subnets(workspace):
+    if x["resource_name"] == subnet_name:
+      vpc_id = x["vpc_id"]
+  for x in query_vpcs(workspace):
+    if x["_id"] == vpc_id:
+      vpc_name = x["resource_name"]
+      
     aws_instance = f'''
 resource "aws_instance" "{resource_name}_instance" {{
     ami = "{ami}"
@@ -204,9 +214,26 @@ resource "aws_instance" "{resource_name}_instance" {{
         delete_on_termination = "{str(delete_on_termination).lower()}"
     }}
     subnet_id = aws_subnet.{subnet_name}_subnet.id
-    key_name = {key_name}
+    associate_public_ip_address = true
+    key_name = aws_key_pair.{key_name}_key.id
+    security_groups = [aws_security_group.{resource_name}_sg.id]
 }}
 
+resource aws_security_group "{resource_name}_sg" {{
+  vpc_id = aws_vpc.{vpc_name}_vpc.id
+  ingress {{
+    cidr_blocks = ["0.0.0.0/0"]
+    protocol = "-1"
+    from_port = 0
+    to_port = 0
+  }}
+  egress {{
+    cidr_blocks = ["0.0.0.0/0"]
+    protocol = "-1"
+    to_port = 0
+    from_port = 0
+  }}
+}}
 '''
     return aws_instance
 
@@ -214,7 +241,7 @@ def aws_key_pair(user,workspace,key_name):
   aws_key_pair = f'''
 resource "aws_key_pair" "{key_name}_key" {{
   key_name   = "{key_name}"
-  public_key = file("/atlas/{user}/{workspace}/keys/{key_name}.pub")
+  public_key = file("/atlas/{user}/{workspace}/keys/{key_name}.pem.pub")
 }}
 '''
   return aws_key_pair
