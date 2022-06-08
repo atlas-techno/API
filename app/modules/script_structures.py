@@ -1,4 +1,4 @@
-from modules.mongodb import query_subnets, query_vpcs
+from modules.mongodb import query_instance, query_ssh_keys_mongdb, query_subnets, query_vpcs
 def build_script(type:str,user:str,workspace:str,*args):
     script = open(f"/atlas/{user}/{workspace}/{type}.tf",mode="a")
     for arg in args:
@@ -237,12 +237,13 @@ resource aws_security_group "{resource_name}_sg" {{
 '''
     return aws_instance
 
-def aws_key_pair(user,workspace,key_name):
+def aws_key_pair(user,key_name):
   aws_key_pair = f'''
 resource "aws_key_pair" "{key_name}_key" {{
   key_name   = "{key_name}"
-  public_key = file("/atlas/{user}/{workspace}/keys/{key_name}.pem.pub")
+  public_key = file("/atlas/{user}/keys/{key_name}.pem.pub")
 }}
 '''
   return aws_key_pair
+
 

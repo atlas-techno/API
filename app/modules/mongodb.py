@@ -16,7 +16,7 @@ subnets = AtlasDB["subnets"]
 instances = AtlasDB["instances"]
 ssh_keys = AtlasDB["ssh_keys"]
 
-def create_workspace(id,name,region):
+def create_workspace_mongodb(id,name,region):
     if users.find_one({"_id":id}) == None:
         user_schema = {
             "_id":f"{id}"
@@ -30,7 +30,7 @@ def create_workspace(id,name,region):
         users.insert_one(user_schema)
         workspaces.insert_one(workspace_schema)
         workspace_id = f'{workspaces.find_one({"user_id":id,"name":name})["_id"]}'
-        create_workspace_(id,workspace_id)
+        create_workspace(id,workspace_id)
         return workspace_id
     else:
         workspace_schema = { 
@@ -40,7 +40,7 @@ def create_workspace(id,name,region):
         }
         workspaces.insert_one(workspace_schema)
         workspace_id = f'{workspaces.find_one({"user_id":id,"name":name})["_id"]}'
-        create_workspace_(id,workspace_id)
+        create_workspace(id,workspace_id)
         return workspace_id
 
 def create_vpc(workspace,name,cidr_block):
@@ -63,7 +63,7 @@ def create_subnet(vpc_id,resource_name,cidr_block):
     subnet_id = f'{subnets.find_one({"vpc_id":f"{vpc_id}","resource_name":f"{resource_name}"})["_id"]}'
     return subnet_id
 
-def create_instance(subnet_id,resource_name,ami,type,count,volume_size,volume_type,delete_on_termination):
+def create_instance_mongodb(subnet_id,resource_name,ami,type,count,volume_size,volume_type,delete_on_termination,key_name):
     instance_schema = {
         "subnet_id":f"{subnet_id}",
         "resource_name":f"{resource_name}",
@@ -72,7 +72,8 @@ def create_instance(subnet_id,resource_name,ami,type,count,volume_size,volume_ty
         "count":f"{count}",
         "volume_size":f"{volume_size}",
         "volume_type":f"{volume_type}",
-        "delete_on_termination":f"{delete_on_termination}"
+        "delete_on_termination":f"{delete_on_termination}",
+        "key_name":f"{key_name}"
     }
     instances.insert_one(instance_schema)
     instance = instances.find_one({"subnet_id":f"{subnet_id}","resource_name":f"{resource_name}"})
@@ -86,7 +87,9 @@ def create_ssh_key_mongodb(user,key_name):
 
     }
     ssh_keys.insert_one(key_schema)
-
+    ssh_key = ssh_keys.find_one({"user_id":f"{user}","key_name":f"{key_name}"})
+    ssh_key["_id"] = f'{ssh_key["_id"]}'
+    return ssh_key
 
 def query_workspaces(id):
     user_id = {
@@ -153,7 +156,7 @@ def query_instance(workspace):
 
 def query_ssh_keys_mongdb(user):
     ssh_keys_list = []
-    ssh_keys_object_list = ssh_keys.find([{"user_id":f"{user}"}])
+    ssh_keys_object_list = ssh_keys.find({"user_id":f"{user}"})
     for x in ssh_keys_object_list:
         x["_id"] = f'{x["_id"]}'
         ssh_keys_list.append(x)

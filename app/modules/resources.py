@@ -27,6 +27,9 @@ class Ec2(BaseModel):
     delete_on_termination:str
     key_name:str
 
+class ssh_key(BaseModel):
+    name: str
+
 class Igw(BaseModel):
     vpc_id:str 
     tag_name:str 

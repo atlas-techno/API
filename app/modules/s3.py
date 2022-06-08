@@ -32,15 +32,15 @@ def pull_infra(user,workspace):
     variables = s3.download_file(BUCKET_NAME,f'/atlas/{user}/{workspace}/var.tf',f'/atlas/{user}/{workspace}/var.tf')
 
 
-def push_key(user,workspace,key_name):
-    with open(f"/atlas/{user}/{workspace}/keys/{key_name}.pem","rb") as f:
-        upload = s3.upload_fileobj(f,BUCKET_NAME,f'/atlas/{user}/{workspace}/keys/{key_name}.pem') 
+def push_key(user,key_name):
+    with open(f"/atlas/{user}/keys/{key_name}.pem","rb") as f:
+        upload = s3.upload_fileobj(f,BUCKET_NAME,f'/atlas/{user}/keys/{key_name}.pem') 
     
-def pull_key(user,workspace,key_name):
-    main = s3.download_file(BUCKET_NAME,f'/atlas/{user}/{workspace}/keys/{key_name}.pem',f'/atlas/{user}/{workspace}/keys/{key_name}.pem')
+def pull_key(user,key_name):
+    main = s3.download_file(BUCKET_NAME,f'/atlas/{user}/keys/{key_name}.pem',f'/atlas/{user}/keys/{key_name}.pem')
 
-def query_keys_s3(user,workspace):
-    key_list = os.listdir(f"/atlas/{user}/{workspace}/keys")
+def query_keys_s3(user):
+    key_list = os.listdir(f"/atlas/{user}/keys")
     return key_list
 
 def create_presigned_url(bucket_name, object_name, expiration=60):

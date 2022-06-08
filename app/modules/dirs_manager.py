@@ -1,12 +1,13 @@
 import os   
-def create_workspace_(user,workspace):
+def create_workspace(user,workspace):
     if not os.path.isdir(f'/atlas/{user}'):
         os.mkdir(f'/atlas/{user}')
     os.chdir(f'/atlas/{user}')
     if not os.path.isdir(f'/atlas/{user}/{workspace}'):
         os.mkdir(f'{workspace}')
     os.chdir(f'/atlas/{user}/{workspace}')
-    os.mkdir(f'/atlas/{user}/{workspace}/keys')
+    if not os.path.isdir(f'/atlas/{user}/keys'):
+        os.mkdir(f'/atlas/{user}/keys')
 
 def delete_dir(user,workspace):
     os.chdir(f'/atlas/{user}')
