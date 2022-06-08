@@ -91,6 +91,9 @@ def create_ssh_key_mongodb(user,key_name):
     ssh_key["_id"] = f'{ssh_key["_id"]}'
     return ssh_key
 
+def delete_workspace_mongodb(workspace):
+    workspaces.delete_one({"_id":f"{workspace}"})
+
 def query_workspaces(id):
     user_id = {
         'user_id':f"{id}"

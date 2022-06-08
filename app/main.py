@@ -122,6 +122,7 @@ def destroy_http(user:str,workspace:str):
     destroy(user,workspace)
     push_infra(user,workspace)
     delete_dir(user,workspace)
+    delete_workspace_mongodb(workspace)
     return {"Status":"Your infrastructure has been destroyed"}
 
 @app.get("/{user}/query_workspaces")
