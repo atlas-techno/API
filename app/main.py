@@ -149,5 +149,9 @@ def query_ssh_keys_http(user:str):
     ssh_keys_list = query_ssh_keys_mongdb(user)
     return ssh_keys_list
 
-#@app.get("")
+@app.post("/{user}/keys")
+def download_key_http(user:str,ssh_key:ssh_key):
+    ssh_key = ssh_key.dict()
+    url = create_presigned_url("atlas.storage",f'/atlas/{user}/keys/{ssh_key["name"]}.pem',60)
+    return {"url":url}
 
