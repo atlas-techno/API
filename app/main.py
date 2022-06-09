@@ -115,12 +115,13 @@ def deploy(user:str,workspace:str):
         push_infra(user,workspace)
     return {"Status":"Your infrastructure has been deployed"}
 
-@app.get('/{user}/{workspace}/destroy', status_code=status.HTTP_202_ACCEPTED)
+@app.delete('/{user}/{workspace}/destroy', status_code=status.HTTP_202_ACCEPTED)
 def destroy_http(user:str,workspace:str):
     goto(user,workspace)
-    pull_infra(user,workspace)
-    destroy(user,workspace)
-    push_infra(user,workspace)
+    #pull_infra(user,workspace)
+    #destroy(user,workspace)
+    #push_infra(user,workspace)
+    #sleep(2)
     delete_dir(user,workspace)
     delete_workspace_mongodb(workspace)
     return {"Status":"Your infrastructure has been destroyed"}
@@ -153,6 +154,7 @@ def query_ssh_keys_http(user:str):
 @app.post("/{user}/keys")
 def download_key_http(user:str,ssh_key:ssh_key):
     ssh_key = ssh_key.dict()
-    url = create_presigned_url("atlas.storage",f'/atlas/{user}/keys/{ssh_key["name"]}.pem',60)
+    print(ssh_key)
+    url = create_presigned_url("atlas.storage",f'/atlas/{user}/keys/{ssh_key["name"]}.pem',120)
     return {"url":url}
 
