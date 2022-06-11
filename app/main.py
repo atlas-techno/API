@@ -115,7 +115,7 @@ def deploy(user:str,workspace:str):
         push_infra(user,workspace)
     return {"Status":"Your infrastructure has been deployed"}
 
-@app.delete('/{user}/{workspace}/destroy', status_code=status.HTTP_202_ACCEPTED)
+@app.get('/{user}/{workspace}/destroy', status_code=status.HTTP_202_ACCEPTED)
 def destroy_http(user:str,workspace:str):
     goto(user,workspace)
     #pull_infra(user,workspace)
