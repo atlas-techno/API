@@ -3,7 +3,9 @@ import pymongo
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-cluster = "mongodb+srv://atlas-techno:Atlas132@cluster0.wts6q.mongodb.net/?retryWrites=true&w=majority"
+#cluster = "mongodb+srv://atlas-techno:Atlas132@cluster0.wts6q.mongodb.net/?retryWrites=true&w=majority"
+
+cluster = "mongodb+srv://atlas-techno:Atlas123>@atlasdb.wythhwu.mongodb.net/?retryWrites=true&w=majority"
 
 client = MongoClient(cluster)
 
