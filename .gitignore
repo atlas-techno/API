@@ -1,10 +1,13 @@
 venv/
 app/__pycache__/
 checklist.md
-venv
+/venv
 a.txt
 main.tf
 venv
+venv/*
+/venv/*
+
 requirements.md
 checklist.md
 app/__pycache__/
